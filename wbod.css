@@ -1,0 +1,192 @@
+
+/* set the map dimensions and style */
+.no_padding {
+    padding:0;
+}
+
+.map {
+  height: 70vh;
+  border: 6px solid #555555;
+}
+
+/* css for information wells */
+
+.info_block {
+  border: 0 none;
+  padding-bottom: 10px;
+  width:22vw;
+}
+
+.header_bar {
+  width: 100%;
+  color: white;
+  background: black;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px;
+  padding-left: 5px;
+}
+
+.title_thin {
+  width: 100%;
+  color: white;
+  background: black;
+  font-weight: 2;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px;
+  padding-left: 5px;
+  font-size: 0.75vw;
+}
+
+/* Note that changing the colour of the text is currently done inline as it is part of an <a> tag */
+.region_id {
+  float:left;
+  border: 1 black;
+  border-radius:0;
+  background-color : #eeae35;
+  font-weight: normal;
+  padding: 0.5em;
+  font-size: 1.5vw;
+  min-height : 2.5em;
+}
+
+/* extend the Bootstrap well style */
+.well-info {
+  float:left;
+  border-radius:0;
+  background-color : #f0f0f0;
+  min-height : 2.5em;
+}
+
+/* button to cancel selection/information */
+.unselect_css_on{
+  float: right;
+  padding-top: 2px;
+  padding-right: 2px;
+  color: rgba(255,255,255,1);
+  background: rgba(0, 0, 0, 0.0);
+  visibility: visible;
+}
+
+.unselect_css_off{
+  visibility: hidden;
+}
+
+.unselect_css_on:hover {
+  color: rgba(105,105,105,1);
+}
+
+/* Formatting for the text information in the info (origin/dest) wells. */
+dl.margins-removed {
+  margin: 0;
+  padding: 0;
+}
+
+.margins-removed dt {
+  margin: 0;
+  padding: 0;
+  font-weight: bold;
+}
+
+.margins-removed dd {
+  margin: 0 0 1em 0;
+  padding: 0;
+}
+
+
+/* css for non-map, non-well stuff */
+
+/* Extend the Bootstrap primary button style */
+.btn-primary {
+  border: 0 none;
+  border-radius:0;
+  background-color: #555555;
+}
+
+.btn-sq-lg {
+  border:2px solid; 
+  width:7.5vw;
+  height:7.5vw;
+  font-size:0.7vw; 
+  vertical-align: middle; 
+  padding:0px
+  background-color: #555555;
+}
+
+.btn-primary:hover, .btn-primary:active, .btn-primary:focus, .btn-primary:active:focus, .btn-primary.active:focus, .btn-primary.active, .btn-primary.focus, .btn-primary.active.focus {
+  background-color: #f39423; !important;
+  border: 2px solid white; !important;
+  box-shadow: none; !important;
+}
+/*
+.btn:hover, .btn:active, .btn:focus, .btn:active:focus, .btn.active:focus, .btn.active, .btn.focus, .btn.active.focus {
+  background-color: #f39423; !important;
+  border: 2px solid white; !important;
+  box-shadow: none; !important;
+}
+*/
+
+.btn-space {
+    margin-right: 5px;
+}
+
+/* Download button within the raw OD matrices within the OD matrix display buttons */
+.dl_css_on{
+  position: relative;
+  left: 10px;
+  color: rgba(255,255,255,1);
+  background: rgba(0, 0, 0, 0.0);
+  visibility: visible;
+}
+
+.dl_css_off{
+  position: relative;
+  left: 10px;
+  color: rgba(105,105,105,1);
+  background: rgba(0, 0, 0, 1.0);
+  visibility: hidden;
+}
+
+.dl_css_on:hover {
+  position: relative;
+  left: 10px;
+  color: rgba(0,0,0,1);
+  background: rgba(0, 0, 0, 0.0);
+  visibility: visible;
+}
+
+
+.version_info_css{
+  color: #ffffff;
+  background: rgba(0, 0, 0, 1.0);
+}
+
+.version_info_css:hover {
+  color: #f39423;
+  background: rgba(0, 0, 0, 0.0);
+  cursor: pointer; 
+  cursor: hand;
+}
+
+/* "Help" tour button */
+.help_css{
+  position: absolute;
+  top: 5px;
+  right: 20px;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.0);
+  visibility: visible;
+}
+
+.help_css:hover {
+  color: #f39423;
+  background: rgba(0, 0, 0, 0.0);
+}
+
+.glyphicon.glyphicon-question-sign{
+  font-size: 35px;
+  font-style:normal;
+}
+

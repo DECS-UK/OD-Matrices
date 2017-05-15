@@ -1,0 +1,1813 @@
+
+<!DOCTYPE html>
+<!-- 
+  Author: Gavin Smith, James Goulding, Mark Iliffe
+  Last Updated: 26th Feb 2017
+  !-->
+
+  <html>
+  <head>
+    <title>Origin Destination Visualisation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localStorage/2.0.1/localStorage.min.js?swfURL=https://cdnjs.cloudflare.com/ajax/libs/localStorage/2.0.1/localStorage.swf"></script>
+    <script src="./ol.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script type="text/javascript" src="underscore-min.js"></script>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="./geojson-vt.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="multibar.css" />
+    <script type="text/javascript" src="multibar.js"></script>
+    <script type="text/javascript" src="html2canvas.js"></script>
+    <link href="bootstrap-tour.min.css" rel="stylesheet" />
+    <script src="bootstrap-tour.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/js/bootstrap-dialog.min.js"></script>
+    <script type="text/javascript" src="./jquery.fileDownload.js"></script>
+    <link rel="stylesheet" type="text/css" href="wbod_widgets.css" />
+    <script type="text/javascript" src="./wbod_widgets.js"></script>
+    <link rel="stylesheet" type="text/css" href="wbod.css" />
+  </head>
+
+
+  <body>
+
+
+  <div class="container-fluid">
+      <div class="row-fluid">
+
+
+        <!--##############################################################################
+        HEADER
+        ###############################################################################-->
+        <div class="row-fluid">
+          <div class="col-md-12" style="background-color: #000000; height:70px; color:#ffffff; font-size: 2.5vh">
+            <div style="float:left"><img src="./decs_icon_white.png" style="height:60px; margin-top:5px"/></div>
+            <div style="float:left; vertical-align: middle">ORIGIN DESTINATION MATRICES <span style="font-size: 1vw">(Dar es Salaam)</span></div>
+            <div style="float:right; vertical-align: middle; margin-top: 7px;" id = "help_btn" class = "help_css glyphicon glyphicon-question-sign" title = "Start tour of interface"></div>
+            <div id="version_info" class="version_info_css" style="float:right; vertical-align: text-bottom;margin-top: 36px;margin-right:10px"><span style="font-size: 0.7vw">V0.9</span></div>
+          </div>
+          <div class="col-md-12" style="background-color: #f39423; margin-bottom: 25px; height:25px; vertical-align: middle"></div>
+        </div>
+
+        <!--##############################################################################
+        NEW NAVIGATION / BUTTON AREA
+        ###############################################################################-->
+        <div class="col-md-2" style="padding-left:5px; padding-right:15px">
+          <div data-toggle="buttons">
+              <div class="btn-group">
+                <label class="btn btn-primary btn-sq-lg active" id="btn_all" style="width:14.9vw">
+                  <input type="radio" name="options"/>All Journeys
+                  <div id="dl_all_journeys" class="dl_css_on glyphicon glyphicon-download-alt"></div>
+                </label>
+                <label class="btn btn-primary btn-sq-lg" id="btn_am">
+                  <input type="radio" name="options"/>AM Journeys
+                  <div id="dl_am_journeys" class="dl_css_off glyphicon glyphicon-download-alt"></div>
+                </label>
+                <label class="btn btn-primary btn-sq-lg" id="btn_pm">
+                  <input type="radio" name="options"/>PM Journeys
+                  <div id="dl_pm_journeys" class="dl_css_off glyphicon glyphicon-download-alt"></div>
+                </label>
+
+                <label class="btn btn-primary btn-sq-lg" id="btn_week" ><input type="radio" name="weekdays"/>Weekday<div id="dl_week_journeys" class="dl_css_off glyphicon glyphicon-download-alt"></div>
+                </label>
+                <label class="btn btn-primary btn-sq-lg" id="btn_weekend"><input type="radio" name="weekend"  />Weekend<div id="dl_weekend_journeys" class="dl_css_off glyphicon glyphicon-download-alt"></div>
+                </label>
+                <label class="btn btn-primary btn-sq-lg" id="btn_hw"><input type="radio" name="options" />Home &rarr; Work<div id="dl_hw_journeys" class="dl_css_off glyphicon glyphicon-download-alt"></div>
+                </label>
+
+                <label class="btn btn-primary btn-sq-lg" id="btn_wh"><input type="radio" name="options" " />Work &rarr; Home<div id="dl_wh_journeys" class="dl_css_off glyphicon glyphicon-download-alt"></div>
+                </label>
+                <label class="btn btn-primary btn-sq-lg" id="btn_ho" ><input type="radio" name="options" />Home &rarr; Other<div id="dl_ho_journeys" class="dl_css_off glyphicon glyphicon-download-alt"></div>
+                </label>
+                <label class="btn btn-primary btn-sq-lg" id="btn_oh"><input type="radio" name="options"  />Other &rarr; Other<div id="dl_oh_journeys" class="dl_css_off glyphicon glyphicon-download-alt"></div>
+                </label>
+              </div>
+            </div>
+
+
+         <div id="info_trips" class="well" style="text-align:center; width: 14.9vw; font-size: 2vh">
+          No trip information to display.
+         </div>
+        </div>
+
+        <!-- #############################################################################
+        MAP AREA
+        ###############################################################################-->
+        <div class="col-md-7 no_padding">
+          <div id="TitleBox" class="title_thin"></div>
+          <div id="map" class="map"></div>
+        </div>
+
+        <!-- #############################################################################
+        INFORMATION AREA
+        ###############################################################################-->
+        <div class="col-md-3">
+
+
+          <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          ORIGIN INFORMATION
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+          <div id="dest_block" class="info_block">
+            <div class="header_bar" style="width:21.5vw;">ORIGIN <span id="unit_text_origin"></span><span id="unselect_origin" class="unselect_css_off glyphicon glyphicon-remove-circle"></span></div>
+
+            <div id="info_origin_well" style="text-align: center;">
+              <div style='float:left; width:5vw; height:5vw; text-align:center; background-color:#f39423'>
+                <a href="#" id="origin_id_field" style="color: white; border-bottom: none; line-height: 5vw; font-size:1.5vw; font-style:normal;"></a>
+              </div>
+              <div id="info_origin" class="well-info" style='float:left; text-align:left; font-size: 1vw; padding-left:4%; padding-top:1%; width:16.5vw;'>
+              </div>
+            </div>
+            <div style="width:21.5vw; margin-bottom: 10px; padding-top: 10px;">
+              <canvas id="origin_chart" width="400" height="200" style="margin-bottom:10px; margin-top: 10px"></canvas>
+            </div>
+          </div>
+
+          <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          DESTINATION INFORMATION
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+          <div id="dest_block" class="info_block" >
+            <div class="header_bar" style="width:21.5vw;">DESTINATION <span id="unit_text_dest"></span><span id="unselect_dest" class="unselect_css_off glyphicon glyphicon-remove-circle"></span></div>
+            <div id="info_dest_well"  style="text-align: center;">
+              <div style='float:left; width:5vw; height:5vw; text-align:center; background-color:#f39423'>
+                <a href="#" id="dest_id_field" style="color: white; border-bottom: none; line-height: 5vw; font-size:1.5vw; font-style:normal;"></a>
+              </div>
+              <div id="info_dest" class="well-info" style='float:left; text-align:left; font-size: 1vw; border:0px none; padding-left:4%; padding-top:1%; width:16.5vw'></div>
+            </div>
+            <div style="width:21.5vw; margin-bottom: 10px; padding-top: 10px;">
+              <canvas id="dest_chart" ></canvas>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+        <!--##############################################################################
+        FOOTER
+        ###############################################################################-->
+        <div class="row-fluid">
+          <div class="col-md-12" style="background-color: #000000; height:80px; margin-top:20px; color:#ffffff; font-size: 3vh; text-align: right">
+          <img src="./decs_logo_black.png" style="height:60px; margin-top:5px;"/>
+          </div>
+        </div>
+
+  </div>
+
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-91625225-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+    <script>
+
+
+
+
+            /**
+       * Define a namespace for the application.
+       */
+
+// Show an alert to explain that things have changed. This
+var alerted = localStorage.getItem('decs_version') || '';
+  if (alerted != '0.9') {
+
+  BootstrapDialog.show({ title: 'Dar es Salaam OD Matrices have been updated to version: 0.9!', message: '<p>This version broadens what is included within the definition of a journey. As a result there is a <b>significant change to the numbers reported within the interface</b>.</p><p>Information regarding all changes can be found by clicking on the version number in the top right corner of the interface.</p><p>If further information is required please <a href=mailto:gavin.smith@decsltd.com>contact us</a>.</p>' });
+
+   localStorage.setItem('decs_version','0.9');
+}       
+
+
+
+
+$('#version_info').on('click', function (e) {
+  BootstrapDialog.show({ 
+    title: 'Dar es Salaam OD Matrices Version: 0.9',
+    message: '<p>Important changes:</p><p><b>Definition of a journey:</b> Journey counts now reflects estimated person journeys for motorized and non-motorised transport. </p><p>This is in contrast to prior versions which were estimated vehicular counts. This change has been realised through the use of known vehicular occupancy rates for Dar es Salaam from the JICA 2007 report and additional work to measure bus to vehicle ratios within footage taken at survey points as part of this work. For more information see the <a href="decs2017_best_practices_report_draft2.pdf">[draft] best practices report.</a><p><p><b>Route visualisation:</b> The underlying road network information has been updated with road classification information enabling more accurate visualisations of road segment usage based on origin-destination counts.<p>If further information is required please <a href=mailto:gavin.smith@decsltd.com>contact us</a>.'});
+
+});
+
+
+var base_path = 'tiles/';//tiles_gav/';
+
+// Interface state needs to be only a dictionary of string like objects
+// i.e. it needs to be converted correctly to a string by function interface_state2string(...)
+// as this is used when returning from an async load to ensure the interface hasn't changed.
+var interface_state = {};
+interface_state['temporal_period'] = 'all';
+interface_state['selection_granularity'] = 'cell';
+interface_state['origindeststyle'] = 'all2all';
+interface_state['display_type'] = 'grid';
+interface_state['selecting_origin'] = true;
+
+var interface_state2string = function( object ){
+  rtn = '';
+  $.each(object, function(index, value) {
+    rtn += value + '_';
+  }); 
+
+		// the interface also is dependent on what is selected.
+		rtn += ( (global_store["origin"] == null ) ? 'null' : global_store["origin"].getId() ) + '_'
+		rtn += ( (global_store["dest"] == null ) ? 'null' : global_store["dest"].getId() ) + '_'
+
+		return rtn;
+ }
+
+ var global_store = {};
+ global_store["origin"] = null;
+ global_store["dest"] = null;
+ global_store["current_geometry"] = null;
+ global_store['layer_data'] = null;
+ global_store['ajax_requests'] = []
+
+
+ function numberWithCommas2dp(x) {
+    //return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    x = Math.ceil(x);
+    return x.toLocaleString('en',{maximumFractionDigits: 0})
+  }
+
+
+
+  
+
+
+// ------------------------ GRID LAYER
+// LOAD THE GRID OVERLAY
+
+
+
+// DEFINE THE STYLE FOR THE GRID OVERLAY
+// here we can provide a style. If not style is provided it defaults to those in:
+// http://openlayers.org/en/latest/apidoc/ol.style.html
+// see: http://openlayers.org/en/latest/apidoc/ol.layer.Vector.html
+
+var fill =     new ol.style.Fill({ color: 'rgba(255,255,255,0.0)'    });
+var stroke = new ol.style.Stroke({ color: 'rgba(255,255,255,0.0)',width: 0      });
+var styleConfig = [
+new ol.style.Style({
+  image: new ol.style.Circle({
+    fill: fill,
+    stroke: stroke,
+    radius: 5
+  }),
+  fill: fill,
+  stroke: stroke
+})
+];
+
+
+
+// ADD THE GRID OVERLAY SOURCE TO IT'S LAYER
+var gridoverlayLayer = new ol.layer.Vector({
+  source: new ol.source.Vector({
+    url: base_path + '/cell.json',
+    format: new ol.format.GeoJSON(),
+  }),
+    //opacity: 0.5
+    style: styleConfig
+  });
+
+// SET THE LAYER Z INDEX
+gridoverlayLayer.setZIndex(3);
+
+
+// filename for now should be either cells.json or wards.json
+var update_selection_granularity = function( ){
+
+  var new_gridoverlaySource = new ol.source.Vector({
+    url: base_path + interface_state['selection_granularity'] +'.json',
+    format: new ol.format.GeoJSON(),
+  });
+
+  gridoverlayLayer.setSource(new_gridoverlaySource);
+
+}
+
+
+// ------------------------ OSM LAYER
+
+var osm = new ol.layer.Tile({
+
+  source: new ol.source.XYZ({
+    attributions: [new ol.Attribution({
+     html: '© <a href="http://cartodb.com/attributions">CartoDB</a> '
+   })],
+    url:'https://cartodb-basemaps-b.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png',
+    crossOrigin: 'anonymous'
+  })
+});
+
+
+var labels = new ol.layer.Tile({
+  source: new ol.source.OSM({"url" : "https://cartodb-basemaps-b.global.ssl.fastly.net/light_only_labels/{z}/{x}/{y}.png"})
+});
+
+labels.setZIndex(2);
+
+
+// ------ DEFINE THE HEAT LAYER FUNCTIONS
+
+var tileOptions = {
+    maxZoom: 20,  // max zoom to preserve detail on
+    tolerance: 5, // simplification tolerance (higher means simpler)
+    extent: 4096, // tile extent (both width and height)
+    buffer: 64,   // tile buffer on each side
+    debug: 0,      // logging level (0 to disable, 1 or 2)
+
+    indexMaxZoom: 0,        // max zoom in the initial tile index
+    indexMaxPoints: 50000 // max number of points per tile in the index
+  };
+
+var vtLayer =new ol.layer.VectorTile();
+
+// uses the format for multibar options
+// E.g
+// var legend_options = {
+// min:0,
+// max:4862227,
+// "multiBarValue": [{val: 0, bgColor: "#ecf7ee"}, {val: 7619, bgColor: "#daefde"}....]};
+var colourize = function( val, legend_options_in ){
+	//console.info(legend_options_in);
+  var shown_warn = false;
+
+  if( val > legend_options_in.max  ) {
+    if( !shown_warn ) { alert("WARNING: Values in layer are outside those represented by the associated colour scheme. Visual colours may be missleading. Please request an update to the underlying data source.\nValue: " + val + ' Max: ' + legend_options_in.max ); }
+    val = legend_options_in.max;
+  } else if ( val < legend_options_in.min){
+    if( !shown_warn ) { alert("WARNING: Values in layer are outside those represented by the associated colour scheme. Visual colours may be missleading. Please request an update to the underlying data source.\nValue: " + val + ' Max: ' + legend_options_in.min ); }
+    val = legend_options_in.min;
+  }
+  var b = 1
+  for(; b < legend_options_in.boundaries.length-1; b++ ){
+    if( val <= legend_options_in.boundaries[b] ){
+      break;
+    }
+  }
+
+  return legend_options_in.multiBarValue[b-1].bgColor
+}
+
+
+function styleFunction_tiles(feature, resolution) {
+
+    var grid_alpha = 0.65;
+    var route_alpha = 0.95;
+      //console.info(global_store.legend_options)
+      
+    if (feature.getGeometry().getType() != 'Polygon'){
+
+        cl_val = global_store['layer_data'][feature.getId()];
+        rgb_colour = colourize(cl_val, global_store.legend_options);
+
+        var istyle = new ol.style.Style({ stroke: new ol.style.Stroke({ color: [rgb_colour[0], rgb_colour[1], rgb_colour[2], route_alpha],  width: 4    })  });
+
+    } else {
+      // we have a region, we'll need to fill it.
+
+        var c_use = [0,0,255,255];
+
+        cl_val = global_store['layer_data'][feature.getId()];
+
+        rgb_colour = colourize(cl_val, global_store.legend_options);
+                              
+        c_use = [rgb_colour[0], rgb_colour[1], rgb_colour[2], grid_alpha] ;
+
+        if( feature.getId() > 2000 ){
+          c_use = [0,0,0,0];
+        }
+
+        var istyle = new ol.style.Style({ stroke: new ol.style.Stroke({ color: [0,0,0,0],  width: 1    }), fill: new ol.style.Fill({ color: c_use })  });                              
+
+    }
+
+    return istyle;
+
+}
+
+
+var geojsonvt_tileLoadFunction = function(tile, url) {
+
+  tile.setLoader(function() {
+
+      var grid_alpha = 0.65;
+      var route_alpha = 0.95;
+
+      var urlbits = url.split("/")
+      var data = tileIndex.getTile(parseInt(urlbits[0]),parseInt(urlbits[1]), parseInt(urlbits[2]))
+      tile.setProjection(ol.proj.get('EPSG:4326'));
+      var feature_set = [];
+
+      // we also want to draw our features in the correct order (higher values on top), so lets keep an array to sort of the values
+      var feature_vals = [];
+
+        //console.info(data);
+        if (data != null){
+
+            // We will loop though all geometries (this will be cells, wards or line segments)
+            // If their ID is in our global_store['layer_data'] we will plot it. If not we will skip it.
+            // The value of global_store['layer_data'] is the number that will be used to generate the colour via the colourize function.
+            // TODO: Generate this colour value in the load data phase along with the legend via https://github.com/schnerd/d3-scale-cluster
+
+            // flattern the feature and convert back from screen coordinates to real coordinates
+            // this
+
+
+            for( i = 0; i < data.features.length; i++ ){
+
+                if( !(data.features[i].id in global_store['layer_data']) ){
+
+                  continue;
+                }
+
+                line_set = []
+                for( j = 0; j < data.features[i]['geometry'].length; j++){
+
+                  var cur_feature = [];
+                  for( k = 0; k < data.features[i]['geometry'][j].length; k++){
+                    var av = data.features[i]['geometry'][j][k];
+                    fX = data.features[i]['geometry'][j][k][0];
+                    fY = data.features[i]['geometry'][j][k][1];
+                    piX = Math.exp(-4*Math.PI*(fY-0.5));
+                    q = (piX-1)/(1+piX);
+                    pY = Math.asin(q)* (180/Math.PI);
+                    pX = (fX-0.5)*360;
+
+                    cur_feature.push([ pX,pY]);
+                  }
+                  line_set.push(cur_feature);
+
+
+                }
+
+                // GEOM BUILDING
+
+                // adapted from https://github.com/openlayers/openlayers/blob/master/src/ol/format/mvt.js
+                var geom;
+                if (data.features[i].type === 1) {
+                  geom = data.features[i]['geometry'] === 1 ?
+                  new ol.geom.Point(line_set,'XY') : new ol.geom.MultiPoint(line_set,'XY');
+                } else if (data.features[i].type === 2) {
+                  if (data.features[i]['geometry'] === 1) {
+                    geom = new ol.geom.LineString(line_set,'XY');
+                  } else {
+                    geom = new ol.geom.MultiLineString(line_set,'XY');
+                  }
+                } else if (data.features[i].type === 3) {
+                  geom = new ol.geom.Polygon(line_set,'XY');
+                }
+                feature_obj = new ol.Feature({ geometry: geom });
+
+
+                // In all cases add the properties
+                feature_obj.setProperties(data.features[i]['tags']);
+                feature_obj.setId(data.features[i].id);
+                feature_vals.push( global_store['layer_data'][data.features[i].id] );
+                feature_set.push( feature_obj );
+
+            }
+
+        }
+
+        // now re-order everything according to the values so our "hottest" items appear on top
+        //console.info('CON')
+        //console.info(argSort(feature_vals));
+
+        var result = _.chain(feature_vals)
+        .pairs()
+        .sortBy(1)
+        .map(function (i) { return feature_set[i[0]]; })
+        .value();
+
+        this.setFeatures(result);
+
+        clear_alert_if_loading();
+  }); // END: tile.setLoader(function() {
+}
+
+
+// ------------------------ COMBINE THE LAYERS ONTO THE MAP
+var map = new ol.Map({
+  controls: ol.control.defaults({
+    zoom: true,
+    attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+      collapsible: true,
+      collapseLabel: '«'
+    })
+  }).extend([
+  new app.LayerRadio(),new app.ClickSelectRadio(), new app.MapControlSave(), new app.MapControlLegend(), new app.RegionGranularityRadio(), new app.showlayers()
+  ]),
+  layers: [
+  osm,
+        //heatLayer,
+        //circleLayer,
+        vtLayer,
+        labels,
+        gridoverlayLayer
+        ],
+        target: 'map',
+
+        view: new ol.View({
+          center: ol.proj.transform([39.3238,-6.8297], 'EPSG:4326', 'EPSG:3857'),
+          zoom: 12
+        })
+      });
+
+// --------- CLICK DEFINTIIONS
+
+
+
+
+//add simple click interaction to the map
+
+var select = new ol.interaction.Select();
+
+
+map.addInteraction(select);
+
+
+            // ----------------- FUNCTIONS FOR ASYNC LOAD AND DISPLAY HEAT MAP DATA
+
+            function ajaxCallBack(layer_data, legend_data, geometry_data, pre_load_interface_state_str_in){
+
+            	// first check to ensure our interface hasn't been updated while the load was async occuring.
+            	// if it has do nothing, the correct update has already occured or is coming soon.
+              //console.info('OK: ' + pre_load_interface_state_str_in + ' ---> ' + interface_state2string(interface_state));
+            	if( pre_load_interface_state_str_in != interface_state2string(interface_state) ){
+            		//console.info('BAD: ' + pre_load_interface_state_str_in + ' ---> ' + interface_state2string(interface_state));
+                return;
+            	}
+
+              // update the legend
+              legend_data.loading_routes = (interface_state['display_type'] == 'route');
+              legend_data.displaying = check_selected();
+
+              $('#boxMultibar').empty();
+              if( legend_data != undefined && legend_data["min"] == 0 && legend_data["max"] == 0 ){
+                show_alert("Visualisation not avaliable. Region does not contain any known buildings and/or routable OpenStreetMap data.","INFO");
+              } else {
+                global_store.legend = $('#boxMultibar').multibar(legend_data);
+
+                global_store.legend_options = legend_data;
+              }
+ 
+global_store['layer_data'] = layer_data;
+
+
+              // update the underlying geometry only if required - so first check
+              var this_geom_type = null;
+              if ( interface_state['display_type'] == 'route' ){
+                this_geom_type = 'route';
+              } else if ( interface_state['selection_granularity'] == 'cell'){
+                this_geom_type = 'cell';
+              } else {
+                this_geom_type = 'ward';
+              }
+
+
+
+              if (global_store["current_geometry"] == this_geom_type ){
+                //console.info('Geom already loaded....');
+                //return;
+              } else {
+
+
+                 // otherwise load the new geometry. This may be either from the cache
+
+                 //console.info('Loading new geom data.... old: ' + global_store["current_geometry"] + ' New: ' + this_geom_type + 'Display_type: ' + interface_state['display_type']);
+
+                 global_store["current_geometry"] = this_geom_type;
+
+                 if ( geometry_data != null ){
+
+                  tileIndex = geojsonvt(geometry_data,tileOptions);
+
+                } else {
+
+                  tileIndex = global_store[global_store["current_geometry"]];
+
+                }
+
+                global_store[global_store["current_geometry"]] = tileIndex;
+              }
+              //console.info(global_store);
+              vtLayer2 = new ol.layer.VectorTile({
+                source: new ol.source.VectorTile({
+
+                        //attributions: [new ol.Attribution({html:'Some portions &copy; <a href="http://decsltd.com/">Digital Economy Consultants</a>'})],
+                        format: new ol.format.MVT(),
+                        tileLoadFunction: geojsonvt_tileLoadFunction,
+                        tileGrid: ol.tilegrid.createXYZ(),
+                        url: '{z}/{x}/{y}'
+                      })
+                ,style: styleFunction_tiles
+              });
+
+// vtLayer2.on('postcompose', function(event) {
+//          clear_alert_if_loading();
+// });
+
+
+
+map.removeLayer(vtLayer);
+map.addLayer(vtLayer2);
+
+vtLayer = vtLayer2;
+
+}
+
+
+function ajaxCallBackError(xhr, ajaxOptions, thrownError){
+  $('#boxMultibar').empty();
+  // console.info(xhr);
+  // console.info(thrownError);
+  // alert(xhr.status);
+  //       alert(thrownError);
+
+  map.removeLayer(vtLayer);
+
+  clear_alert();
+  show_alert('<b>ERROR:</b> Data for visualisation not accessible.', 'ERROR');
+}
+
+
+function cache_geom_ward( geometry_data ){
+	var tmp_tileIndex = geojsonvt(geometry_data,tileOptions);
+	global_store['ward'] = tmp_tileIndex;
+}
+
+function cache_geom_route( geometry_data ){
+	var tmp_tileIndex = geojsonvt(geometry_data,tileOptions);
+	global_store['route'] = tmp_tileIndex;
+}
+
+
+
+// we only pre-load ward and route, cell will be done on first load as part of the main loop
+function pre_load_geometries(){
+  $.ajax({
+    'async': true,
+    'global': false,
+    cache: true,
+    'url': base_path + 'ward.json',
+    'dataType': 'json',
+    'success' : cache_geom_ward
+  });
+  $.ajax({
+    'async': true,
+    'global': false,
+    cache: true,
+    'url': base_path + 'route.json',
+    'dataType': 'json',
+    'success' : cache_geom_route
+  });
+}
+
+pre_load_geometries();
+
+function load_data(filename){
+//console.info('Loading filename: '+ filename);
+              // Now we want to ensure our tileindex global variable is set correctly. We will keep all options cached in the global_store
+              // after we have loaded them for use once.
+              clear_alert();
+
+              
+
+              show_alert("Loading data..","INFO");
+
+              var base_layer_file = null;
+              if ( interface_state['display_type'] == 'route' ){
+                base_layer_file = 'route';
+              } else if ( interface_state['selection_granularity'] == 'cell'){
+                base_layer_file = 'cell';
+              } else {
+                base_layer_file = 'ward';
+              }
+
+              var pre_load_interface_state_str = interface_state2string(interface_state);
+              var a1, a2, a3;
+              //console.info('Requesting: ' + pre_load_interface_state_str);
+
+              if( global_store[base_layer_file] == null ){
+                // we need to load the tileIndex
+
+                
+                $.when(
+                  a1 = $.ajax({
+                    'async': true,
+                    'global': false,
+                    cache: false,
+                    'url': base_path + interface_state['temporal_period'] + '/' + interface_state['selection_granularity'] + '/' + interface_state['origindeststyle'] + '/' + interface_state['display_type']+ '/' + filename + '.json',
+                    'dataType': 'json'
+                  }),
+                  a2 = $.ajax({
+                    'async': true,
+                    'global': false,
+                    cache: false,
+                    'url': base_path + interface_state['temporal_period'] + '/' + interface_state['selection_granularity'] + '/' + interface_state['origindeststyle'] + '/' + interface_state['display_type']+ '/' + filename + '_legend.json',
+                    'dataType': "json"
+                  }),
+                  a3 = $.ajax({
+                    'async': true,
+                    'global': false,
+                    cache: true,
+                    'url': base_path + base_layer_file + '.json',
+                    'dataType': 'json'
+                  })
+                  ).then( function(a1, a2, a3){ ajaxCallBack(a1[0],a2[0], a3[0], pre_load_interface_state_str );}, function(xhr, ajaxOptions, thrownError){ ajaxCallBackError(xhr, ajaxOptions, thrownError)} );
+
+                global_store['ajax_requests'].push(a1);
+                global_store['ajax_requests'].push(a2);
+                global_store['ajax_requests'].push(a3);
+                
+              } else {
+
+                $.when(
+                  a1 = $.ajax({
+                    'async': true,
+                    'global': false,
+                    cache: true,
+                    'url': base_path + interface_state['temporal_period'] + '/' + interface_state['selection_granularity'] + '/' + interface_state['origindeststyle'] + '/' + interface_state['display_type']+ '/' + filename + '.json',
+                    'dataType': 'json'
+                  }),
+                  a2 = $.ajax({
+                    'async': true,
+                    'global': false,
+                    cache: true,
+                    'url': base_path + interface_state['temporal_period'] + '/' + interface_state['selection_granularity'] + '/' + interface_state['origindeststyle'] + '/' + interface_state['display_type']+ '/' + filename + '_legend.json',
+                    'dataType': "json"
+                  })
+                  ).then( function(a1, a2){ ajaxCallBack(a1[0],a2[0], null, pre_load_interface_state_str );}, function(xhr, ajaxOptions, thrownError){ ajaxCallBackError(xhr, ajaxOptions, thrownError)} );
+
+                  global_store['ajax_requests'].push(a1);
+                  global_store['ajax_requests'].push(a2);
+               
+                
+              }
+
+
+
+
+            }
+
+
+
+            // DEFINE THE CHARTS
+
+            var ctx = $("#dest_chart");
+            var dest_chart = new Chart(ctx, {
+              type: 'horizontalBar',
+              data: {
+                labels: [],
+                datasets: [
+                {
+                  label: "Highest ranked origins",
+                  data: []
+                }
+                ]
+              },
+              options: {
+                onClick: function chart_click( evt ){
+                  if( this.getElementAtEvent(evt)[0] != undefined ){
+                    clicked_cell_id = this.getElementAtEvent(evt)[0]._model.label;
+                    var source = gridoverlayLayer.getSource();
+                    var new_feature = source.getFeatureById(clicked_cell_id);
+                    $('#cmn-toggle-7').click(); // DELETE TO ENABLE MULTSELECT
+                    update_selection_with_feature(new_feature, true);
+                  }
+                },
+
+                tooltips: {
+                  enabled: true,
+                  mode: 'single',
+                  callbacks: {
+                    label: function(tooltipItems, data) {
+                      return ' ' + numberWithCommas2dp(tooltipItems.xLabel) + '% of journeys';
+                    }
+                  }
+                },
+
+                scales: {
+                  yAxes: [{
+                    ticks: {
+                      beginAtZero:true
+                    },
+                    scaleLabel: {
+                      display: true,
+                      labelString: 'Region ID'
+                    }
+                  }],
+                  xAxes: [{
+                    ticks: {
+                      beginAtZero:true
+                    },
+                    scaleLabel: {
+                      display: true,
+                      labelString: 'percentage'
+                    }
+                  }]
+                }
+              }
+            });
+
+
+            var ctx = $("#origin_chart");
+            var origin_chart = new Chart(ctx, {
+              type: 'horizontalBar',
+              data: data = {
+                labels: [],
+                datasets: [
+                {
+                  label: "Highest ranked destinations",
+                  data: []
+                }
+                ]
+              },
+              options: {
+                onClick: function chart_click( evt ){
+                  if( this.getElementAtEvent(evt)[0] != undefined ){
+                    clicked_cell_id = this.getElementAtEvent(evt)[0]._model.label;
+                    var source = gridoverlayLayer.getSource();
+                    var new_feature = source.getFeatureById(clicked_cell_id);
+                    $('#cmn-toggle-7').click(); // DELETE TO ENABLE MULTSELECT
+                    update_selection_with_feature(new_feature, false);
+                  }
+                },
+
+                tooltips: {
+                  enabled: true,
+                  mode: 'single',
+                  callbacks: {
+                    label: function(tooltipItems, data) {
+                      return ' ' + numberWithCommas2dp(tooltipItems.xLabel) + '% of journeys';
+
+                    }
+                  }
+                },
+                scales: {
+                  yAxes: [{
+                    ticks: {
+                      beginAtZero:true
+                    },
+                    scaleLabel: {
+                      display: true,
+                      labelString: 'Region ID'
+                    }
+                  }],
+                  xAxes: [{
+                    ticks: {
+                      beginAtZero:true
+                    },
+                    scaleLabel: {
+                      display: true,
+                      labelString: 'percentage'
+                    }
+                  }]
+                }
+              }
+            });
+
+
+
+            // DEFINE THE GRAPH UPDATE/CLEAR FUNCTIONS
+            function update_chart( chart, data ){
+              chart.data.datasets[0].data = data.datasets[0].data;
+              chart.data.labels = data.labels;
+              chart.update();
+            }
+
+            function clear_chart( chart ){
+              blank_data = {
+                labels: [],
+                datasets: [
+                {
+                  data: []
+                }
+                ]
+              };
+              update_chart(chart, blank_data);
+            }
+
+
+
+            function clear_info_origin(){
+              $('#origin_id_field').editable('setValue', null);
+
+              $('#origin_id_field').text("None");
+
+              $("#info_origin").text("");
+              $('#unselect_origin').attr('class','unselect_css_off glyphicon glyphicon-remove-circle');
+              clear_chart( origin_chart );
+            }
+
+            function clear_info_dest(){
+              $('#dest_id_field').editable('setValue', null);
+
+              $('#dest_id_field').text("None");
+              $('#unselect_dest').attr('class','unselect_css_off glyphicon glyphicon-remove-circle');
+              $("#info_dest").text("");
+              clear_chart( dest_chart );
+            }
+
+
+            function clear_info(){
+              //$('#info_origin_well').css("min-height", $('#info_origin_well').css("height"));
+              //$('#info_dest_well').css("min-height", $('#info_dest_well').css("height"));
+              clear_info_origin();
+              clear_info_dest();
+              $("#info_trips").text("No trip information to display.");
+                //clear_chart( origin_route_chart );
+              }
+
+
+              function reset_display(){
+                if( global_store["dest"] != null ){  global_store["dest"].setStyle(styleConfig); }
+                global_store["origin"] = null;
+                if( global_store["origin"] != null ){  global_store["origin"].setStyle(styleConfig); }
+                global_store["dest"] = null;
+
+                update_selection();
+                clear_info();
+              }
+
+
+              function load_info_trip(filename){
+                //special case when, for trip info, the number or trips in the all case is symetric.
+                if(filename == 'allDest' || filename == 'allOrigin'){
+                  filename = 'all';
+                }
+
+                var a1 = $.ajax({
+                  url : base_path + interface_state['temporal_period'] + '/' + interface_state['selection_granularity'] + '/' + interface_state['origindeststyle'] +'/' + 'trip_info/'+filename + '.json',
+
+                  dataType: "json",
+                  cache: true,
+                  success : function (d) {
+                    // $("#info_trips").html("");
+                    // $("#info_trips").append(d["trips"]);
+
+                    $("#info_trips").html("<dl class=\"margins-removed\">")
+
+                    for (var key in d["trips"]) {
+                      $("#info_trips").append("<dt>" + key + "</dt>")
+                      $("#info_trips").append("<dd>" + numberWithCommas2dp(d["trips"][key]) + "</dd>")
+                    }
+                    $("#info_origin").append("</dl>")
+
+
+                  },
+                  error: function(request, status, error){
+                    $("#info_trips").html("<b>ERROR:</b> Trip information failed to load.");
+
+                  }
+
+                });
+                global_store['ajax_requests'].push(a1);
+              }
+
+
+
+              function load_info_origin(filename){
+
+                var a1 = $.ajax({
+                  url : base_path + interface_state['temporal_period'] + '/' + interface_state['selection_granularity'] + '/info/origin/'+filename,
+                  dataType: "json",
+                  cache: true,
+                  success : function (d) {
+                    $('#unselect_origin').attr('class','unselect_css_on glyphicon glyphicon-remove-circle')
+                    $("#origin_id_field").html(d["region_id"]);
+                        //$('#origin_id_field') = d["region_id"]
+                        $("#info_origin").html("<dl class=\"margins-removed\">")
+
+			var ordered_keys = [];
+			for( var key in d["origin"] ){
+				ordered_keys.push(key);
+			}
+	                ordered_keys.sort();
+			ordered_keys.reverse();
+			var tmp_x = ordered_keys[1];
+			ordered_keys[1] = ordered_keys[2];
+			ordered_keys[2] = tmp_x;
+
+                        for (var key_idx = 0; key_idx < ordered_keys.length; key_idx++) {
+                          $("#info_origin").append("<dt>" + ordered_keys[key_idx] + "</dt>");
+                          $("#info_origin").append("<dd>" + d["origin"][ordered_keys[key_idx]] + "</dd>");
+                        }
+                        $("#info_origin").append("</dl>");
+
+                        update_chart( origin_chart, d["origin_chart_data"] );
+
+                        if( d["origin"]['Building Count'] == "Unknown" ){
+                          show_alert("<b>INFO: </b>No journeys to visualize: no building information for selected origin.","INFO");
+                        }
+
+                      },
+                      error: function(request, status, error){
+                        $('#unselect_origin').attr('class','unselect_css_on glyphicon glyphicon-remove-circle');
+                        clear_info_origin();
+                        $("#info_origin").html("<b>ERROR:</b> Origin information failed to load.");
+
+                      }
+                    });
+                global_store['ajax_requests'].push(a1);
+            
+              }
+
+              function load_info_dest(filename){
+
+                var a1 = $.ajax({
+                  url : base_path + interface_state['temporal_period'] + '/' + interface_state['selection_granularity'] + '/info/dest/'+filename,
+                  dataType: "json",
+                  cache: true,
+                  success : function (d) {
+
+                    $('#unselect_dest').attr('class','unselect_css_on glyphicon glyphicon-remove-circle')
+                    $("#dest_id_field").html(d["region_id"]);
+                    $("#info_dest").html("<dl class=\"margins-removed\">")
+
+
+			var ordered_keys = [];
+			for( var key in d["dest"] ){
+				ordered_keys.push(key);
+			}
+		        ordered_keys.sort();
+			ordered_keys.reverse();
+			var tmp_x = ordered_keys[1];
+			ordered_keys[1] = ordered_keys[2];
+			ordered_keys[2] = tmp_x;
+
+		        for (var key_idx = 0; key_idx < ordered_keys.length; key_idx++) {
+		          $("#info_dest").append("<dt>" + ordered_keys[key_idx] + "</dt>");
+		          $("#info_dest").append("<dd>" + d["dest"][ordered_keys[key_idx]] + "</dd>");
+		        }
+
+                    $("#info_dest").append("</dl>")
+
+                    if( d["dest"]['Building Count'] == "Unknown" ){
+                      show_alert("<b>INFO: </b>No journeys to visualize: no building information for selected destination.","INFO");
+                    }
+
+                    update_chart( dest_chart, d["dest_chart_data"] );
+                        //update_chart( origin_route_chart, d["deset_chart_route_data"]);
+                      },
+                      error: function(request, status, error){
+                        $('#unselect_dest').attr('class','unselect_css_on glyphicon glyphicon-remove-circle');
+                        clear_info_dest();
+                        $("#info_dest").html("<b>ERROR:</b> Destination information failed to load.");
+
+                      }
+                    });
+                global_store['ajax_requests'].push(a1);
+              }
+
+
+              function set_dl( toset ){
+                $('#dl_all_journeys').attr('class','dl_css_off glyphicon glyphicon-download-alt');
+                $('#dl_am_journeys').attr('class','dl_css_off glyphicon glyphicon-download-alt');
+                $('#dl_pm_journeys').attr('class','dl_css_off glyphicon glyphicon-download-alt');
+                $('#dl_week_journeys').attr('class','dl_css_off glyphicon glyphicon-download-alt');
+                $('#dl_weekend_journeys').attr('class','dl_css_off glyphicon glyphicon-download-alt');
+                $('#dl_hw_journeys').attr('class','dl_css_off glyphicon glyphicon-download-alt');
+                $('#dl_wh_journeys').attr('class','dl_css_off glyphicon glyphicon-download-alt');
+                $('#dl_ho_journeys').attr('class','dl_css_off glyphicon glyphicon-download-alt');
+                $('#dl_oh_journeys').attr('class','dl_css_off glyphicon glyphicon-download-alt');
+
+                toset.attr('class','dl_css_on glyphicon glyphicon-download-alt');
+
+              }
+
+
+
+              function download_OD( OD_matrix ){
+                BootstrapDialog.show({
+                  title: '<b>Full raw OD matrix download (and shapefile) for: </b> <u><i>' + OD_matrix.replace('_',' ') + '</u></i>',
+                  message: 'Select the granularity of the OD Matrix to download:',
+                  buttons: [{
+                    label: 'Download zonal unit based',
+                    cssClass: 'btn-primary',
+                    action: function(){
+                      //window.open('matrices/'+ OD_matrix +'_zonal_unit.csv.zip');
+                      //window.open('matrices/zonal_units_shapefile.zip');
+                      $.fileDownload('matrices/'+ OD_matrix +'_zonal_unit.csv.zip');
+                      $.fileDownload('matrices/zonal_units_shapefile.zip');
+                      //alert('hello');
+                    }
+                  }, {
+                    label: 'Download ward based',
+                    cssClass: 'btn-primary',
+                    action: function(){
+                      $.fileDownload('matrices/'+ OD_matrix +'_ward.csv.zip');
+                      $.fileDownload('matrices/ward_shapefile.zip');
+                    }
+                  }
+
+                  ]
+                });
+              }
+
+
+              $('#dl_all_journeys').on('click', function (e) {
+                download_OD( 'all_journeys' );
+
+              });
+              $('#dl_am_journeys').on('click', function (e) {
+                download_OD( 'am_journeys' );
+
+              });
+              $('#dl_pm_journeys').on('click', function (e) {
+                download_OD( 'pm_journeys' );
+
+              });
+              $('#dl_week_journeys').on('click', function (e) {
+                download_OD( 'week_journeys' );
+
+              });
+              $('#dl_weekend_journeys').on('click', function (e) {
+                download_OD( 'weekend_journeys' );
+
+              });
+              $('#dl_oh_journeys').on('click', function (e) {
+                download_OD( 'other_other_journeys' );
+
+              });
+              $('#dl_ho_journeys').on('click', function (e) {
+                download_OD( 'home_other_journeys' );
+
+              });
+              $('#dl_wh_journeys').on('click', function (e) {
+                download_OD( 'commute_home_journeys' );
+
+              });
+              $('#dl_hw_journeys').on('click', function (e) {
+                download_OD( 'commute_work_journeys' );
+
+              });
+
+            // --- SET THE BUTTON ACTIONS
+
+
+
+            $('#btn_all').on('click', function (e) {
+              set_dl( $('#dl_all_journeys') );
+              interface_state['temporal_period'] = 'all';
+              update_selection();
+
+            });
+
+            $('#btn_am').on('click', function (e) {
+              set_dl( $('#dl_am_journeys') );
+              interface_state['temporal_period'] = 'am';
+              update_selection();
+
+            });
+            $('#btn_pm').on('click', function (e) {
+              set_dl( $('#dl_pm_journeys') );
+              interface_state['temporal_period'] = 'pm';
+              update_selection();
+
+            });
+
+            $('#btn_week').on('click', function (e) {
+              set_dl( $('#dl_week_journeys') );
+              interface_state['temporal_period'] = 'week';
+              update_selection();
+
+            });
+
+            $('#btn_weekend').on('click', function (e) {
+              set_dl( $('#dl_weekend_journeys') );
+              interface_state['temporal_period'] = 'weekend';
+              update_selection();
+
+            });
+
+            $('#btn_hw').on('click', function (e) {
+              set_dl( $('#dl_hw_journeys') );
+              interface_state['temporal_period'] = 'hw';
+              update_selection();
+
+            });
+
+            $('#btn_wh').on('click', function (e) {
+              set_dl( $('#dl_wh_journeys') );
+              interface_state['temporal_period'] = 'wh';
+              update_selection();
+
+            });
+
+            $('#btn_ho').on('click', function (e) {
+              set_dl( $('#dl_ho_journeys') );
+              interface_state['temporal_period'] = 'ho';
+              update_selection();
+
+            });
+
+            $('#btn_oh').on('click', function (e) {
+              set_dl( $('#dl_oh_journeys') );
+              interface_state['temporal_period'] = 'oh';
+              update_selection();
+
+            });
+
+
+            // ------ LOAD THE INITIAL HEAT MAP DATA
+
+            //load_data('allOrigin');
+            //load_data('../cells.json');
+
+            // ------------------------ ADD THE INTERACTION (CLICKS)
+
+            // Convenience function, returns what is being displayed
+            // Returns 'origin2all', 'origin2dest', 'dest2all', 'all2all'
+            var check_selected = function(){
+
+
+              if( global_store['origin'] == null && global_store['dest'] == null ){
+                if( interface_state['display_type'] == 'route'){
+                  return 'all2all_routes';
+                } else {
+                  return interface_state['selecting_origin'] ? 'all2all_grid_origin' : 'all2all_grid_dest';
+                }
+
+              } else if (global_store['origin'] != null){
+                return interface_state['display_type'] == 'route' ? 'origin2all_routes' : 'origin2all_grid';
+              } else if (global_store['dest'] != null) {
+                return interface_state['display_type'] == 'route' ? 'dest2all_routes' : 'dest2all_grid';
+              }
+
+              return 'origin2dest';
+            }
+
+            var cache_route = {};
+
+
+            origin_select_style  = new ol.style.Style({
+              stroke: new ol.style.Stroke({
+                color: '#eeae35',
+                width: 4
+              })
+            });
+
+            dest_select_style  = new ol.style.Style({
+              stroke: new ol.style.Stroke({
+                color: '#ec4b05',
+                width: 4
+              })
+            });
+
+            var text_dict = {}
+
+            text_dict["grid"] = "Counts of movement" ;
+            text_dict["route"] = "Road segment usage";
+            text_dict["true"] = "from the selected origin to";
+            text_dict["false"] = "towards the selected destination from";
+            text_dict["all"] = " ";
+            text_dict["am"] = " (00:00 to 12:00) ";
+            text_dict["pm"] = " (12:00 to 24:00) ";
+            text_dict["week"] = " (weekdays) ";
+            text_dict["weekend"] = " (weekends) ";
+            text_dict["ho"] = " (home to other) ";
+            text_dict["oh"] = " (other to other) ";
+            text_dict["wh"] = " (work to home) ";
+            text_dict["hw"] =  " (home to work) ";
+
+            var text_dict2  = {};
+            text_dict2["true"] = "origininating from";
+            text_dict2["false"] = "travelling to";
+            text_dict2["cell"] = "zonal unit";
+            text_dict2["ward"] = "ward";
+            text_dict2["grid"] = "journey" ;
+            text_dict2["route"] = "road segment usage";
+
+
+            function redo_title(){
+              if( interface_state["origindeststyle"] == 'all2all' ){
+
+                title_text = "Heatmap of " + text_dict2[ interface_state["display_type"] ] +" "+ text_dict2[ interface_state["selecting_origin"].toString() ] + " each " + text_dict2[ interface_state["selection_granularity"] ] + text_dict[ interface_state["temporal_period"] ];
+
+              } else {
+
+                title_text = text_dict[ interface_state["display_type"] ] + text_dict[ interface_state["temporal_period"] ] + text_dict[ interface_state["selecting_origin"].toString() ] + " all others"
+
+              }
+              set_title(title_text);
+            }
+
+
+//-- START MAIN UPDATE FUNCTION
+function update_selection(){
+  $('#dest_id_field').editable('setValue', null);
+  $('#origin_id_field').editable('setValue', null);
+  selection = select.getFeatures();
+  selection.clear(); //styleConfig
+
+// clear prior loads
+  //console.info(global_store['ajax_requests'])
+  for( var i =0; i < global_store['ajax_requests'].length; i++ ){
+    global_store['ajax_requests'][i].abort();
+  }
+
+
+  global_store['ajax_requests'] = [];
+
+
+
+
+//====================================
+//====================================
+
+if( interface_state["selecting_origin"] ){ // DELETE TO ENABLE MULTSELECT
+
+  if( global_store["origin"] != null ){
+    global_store["origin"].setStyle(origin_select_style);
+    selection.push(global_store["origin"]);
+  }
+
+clear_selection_optional_update(false, false);// DELETE TO ENABLE MULTSELECT
+} else {// DELETE TO ENABLE MULTSELECT
+
+
+  if( global_store["dest"] != null ){
+    global_store["dest"].setStyle(dest_select_style);
+    selection.push(global_store["dest"]);
+  }
+
+clear_selection_optional_update(true, false);// DELETE TO ENABLE MULTSELECT
+} // DELETE TO ENABLE MULTSELECT
+
+clear_alert();
+
+
+
+              // SELECTED ORIGIN TO DESTINATION
+              if( global_store['origin'] != null && global_store['dest'] != null ){
+
+                $("#layer_btn_route").addClass("active")
+                $("#layer_btn_grid").removeClass("active")
+                interface_state['display_type'] = 'route';
+
+                interface_state['origindeststyle'] = 'origin2dest';
+                cache_key = global_store['origin'].getId().toString() + 'to' + global_store['dest'].getId().toString();
+                load_info_origin(global_store['origin'].getId().toString()  + ".json");
+                load_info_dest(global_store['dest'].getId().toString()  + ".json");
+
+              }
+
+
+              if( global_store['origin'] != null && global_store['dest'] == null ){
+                    // SELECT ORIGIN TO EVERYTHING
+                    cache_key = global_store['origin'].getId().toString()
+                    interface_state['origindeststyle'] = 'origin2all';
+                    load_info_origin(global_store['origin'].getId().toString()  + ".json");
+                  }
+
+
+                  if( global_store['dest'] != null && global_store['origin'] == null ){
+                    // SELECT DEST TO EVERYTHING
+                    cache_key = global_store['dest'].getId().toString()
+                    interface_state['origindeststyle'] = 'all2dest';
+                    load_info_dest(global_store['dest'].getId().toString()  + ".json");
+                  }
+
+                  if( global_store['dest'] == null && global_store['origin'] == null ){
+
+
+                    // Update info box to show this is not supported / clear the info box
+                    // clear the selection
+
+                    interface_state['origindeststyle'] = 'all2all';
+                    if( interface_state['display_type'] == 'route' ){
+                      cache_key = 'all';
+                    } else {
+                      if( interface_state['selecting_origin'] ){
+                        cache_key = 'allOrigin';
+                      } else {
+                        cache_key = 'allDest';
+                      }
+                    }
+                  }
+
+
+                  load_info_trip( cache_key );
+                  if( interface_state['display_type'] == 'route' ){
+                    load_data( cache_key );
+
+                    //load_legend_data('route/' + cache_key )
+                  } else {
+                    load_data( cache_key );
+                    //load_legend_data('grid/' + cache_key )
+                  }
+
+
+                  redo_title();
+
+                }
+//-------------- END UPDATE FUNCTION
+
+
+
+
+select.on('select', function(e) {
+  var selection = select.getFeatures();
+
+  if( selection.getArray()[selection.getLength()-1] != undefined ){
+    //console.info(selection.getArray().length);
+
+    if( ( global_store["origin"] != null && selection.getArray()[selection.getLength()-1].getId() == global_store["origin"].getId() )
+      ||
+      (global_store["dest"] != null && selection.getArray()[selection.getLength()-1].getId() == global_store["dest"].getId() ) ) {
+      // do nothing -> if we try and make the origin the destination or vice versa
+  } else {
+
+    if( interface_state['selecting_origin'] ){
+      if( global_store["origin"] != null ){  global_store["origin"].setStyle(styleConfig); }
+      global_store["origin"] = selection.getArray()[selection.getLength()-1];
+    } else {
+      if( global_store["dest"] != null ){  global_store["dest"].setStyle(styleConfig); }
+      global_store["dest"] = selection.getArray()[selection.getLength()-1];
+    }
+  }
+}
+
+
+update_selection();
+
+});
+
+
+
+update_selection_with_feature = function( feature_in, feature_is_origin ){
+
+
+  if( feature_is_origin ){
+    interface_state["selecting_origin"] = true; // DELETE TO ENABLE MULTSELECT
+    if( global_store["origin"] != null ){  global_store["origin"].setStyle(styleConfig); }
+    global_store["origin"] = feature_in;
+
+    $("#cmn-toggle-7").prop( "checked", true );
+
+  } else {
+    interface_state["selecting_origin"] = false; // DELETE TO ENABLE MULTSELECT
+    if( global_store["dest"] != null ){  global_store["dest"].setStyle(styleConfig); }
+    global_store["dest"] = feature_in;
+    $("#cmn-toggle-7").prop( "checked", false );
+  }
+
+  update_selection();
+
+}
+
+
+$('#origin_id_field').editable({
+  type: 'text',
+  pk: 1,
+  emptytext: 'None',
+  title: 'Enter a zonal unit identifier',
+  validate: function (value) {
+    if( value == "None"){
+      $(this).html(value);
+    } else {
+
+      var valid = false;
+      feature_set = gridoverlayLayer.getSource().getFeatures();
+      for(var f=0;f<feature_set.length;f++) {
+        if(feature_set[f].getId() == value) {
+          valid = true;
+          break;
+        }
+      }
+      if( valid ){
+        $(this).html(value);
+      } else {
+        return 'Invalid identifier entered';
+      }
+    }
+
+  },
+  success: function(response, newValue) {
+
+    var bla = newValue;
+
+    feature_set = gridoverlayLayer.getSource().getFeatures();
+    for(var f=0;f<feature_set.length;f++) {
+      if(feature_set[f].getId() == bla) {
+        update_selection_with_feature(feature_set[f], true);
+        valid = true;
+        break;
+      }
+    }
+
+  }
+});
+
+
+$('#dest_id_field').editable({
+  type: 'text',
+  pk: 1,
+  emptytext: 'None',
+  title: 'Enter a zonal unit identifier',
+  validate: function (value) {
+    if( value == "None"){
+      $(this).html(value);
+    } else {
+
+      var valid = false;
+      feature_set = gridoverlayLayer.getSource().getFeatures();
+      for(var f=0;f<feature_set.length;f++) {
+        if(feature_set[f].getId() == value) {
+          valid = true;
+          break;
+        }
+      }
+      if( valid ){
+        $(this).html(value);
+      } else {
+        return 'Invalid identifier entered';
+      }
+    }
+
+  },
+  success: function(response, newValue) {
+
+    var bla = newValue;
+            //alert(bla);
+
+            feature_set = gridoverlayLayer.getSource().getFeatures();
+            for(var f=0;f<feature_set.length;f++) {
+              if(feature_set[f].getId() == bla) {
+                update_selection_with_feature(feature_set[f], false);
+                break;
+              }
+            }
+
+          }
+        });
+
+
+var set_title = function( text_to_show ){
+
+  $('#TitleBox').text(text_to_show);
+
+}
+
+
+
+var show_alert = function( text_to_show, type ){
+
+
+  if(text_to_show.length>0){
+    global_store['warning'] = new app.WarningPane();
+    map.addControl(global_store['warning']);
+    $('#warningBox').html(text_to_show);
+
+    if( type == 'ERROR'){
+      $('#warningBox').attr('class','warningInner_css warningError');
+    } else if (type == 'WARNING'){
+      $('#warningBox').attr('class','warningInner_css warningWarning');
+    } else if (type == 'INFO'){
+      $('#warningBox').attr('class','warningInner_css warningAlert');
+    } else if (type == 'SUCCESS'){
+      $('#warningBox').attr('class','warningInner_css warningSuccess');
+    } else {
+      $('#warningBox').attr('class','warningInner_css warningAlert');
+    }
+
+
+  }
+}
+
+var clear_alert = function(){
+
+  map.removeControl( global_store['warning'] );
+  $("div.warning_css").remove();
+}
+
+var clear_alert_if_loading = function(){
+
+  if( $('#warningBox').text() == "Loading data.."){
+    clear_alert();
+  }
+}
+
+
+
+var clear_selection_optional_update = function( clear_origin, should_update ){
+
+  if( clear_origin ){
+    if( global_store["origin"] != null ){  global_store["origin"].setStyle(styleConfig); }
+    global_store['origin'] = null;
+  } else {
+    if( global_store["dest"] != null ){  global_store["dest"].setStyle(styleConfig); }
+    global_store['dest'] = null;
+  }
+
+
+  if( clear_origin ){
+    $('#unselect_origin').attr('class','unselect_css_off');
+  } else {
+    $('#unselect_dest').attr('class','unselect_dest_css_off')
+  }
+  clear_info()
+  if( should_update ){
+    update_selection();
+  }
+
+}
+
+      // CONTEXTUAL BUTTON FOR CANCELLING SELECTION OF ORIGIN
+      var clear_selection = function( clear_origin ){
+
+        clear_selection_optional_update( clear_origin, true )
+      }
+
+
+
+
+
+
+      var clear_origin = function(){ clear_selection(true);}
+      var clear_dest = function(){ clear_selection(false);}
+      $('#unselect_origin').on('click', clear_origin);
+      $('#unselect_dest').on('click', clear_dest);
+
+      var toggle_label_layer = function(){
+        $('#label_layer_control').toggleClass("layer_on");
+        var viz = labels.getVisible();
+        labels.setVisible(!viz);
+      }
+
+      var toggle_heat_layer = function(){
+        $('#heat_layer_control').toggleClass("layer_on");
+        var viz = vtLayer.getVisible();
+        vtLayer.setVisible(!viz);
+      }
+
+      $('#label_layer_control').on('click', toggle_label_layer);
+      $('#heat_layer_control').on('click', toggle_heat_layer);
+
+
+
+
+      $(map.getViewport()).on('mousemove', function (e) {
+        var pixel = map.getEventPixel(e.originalEvent);
+        var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
+          if( "legend" in global_store ){
+            var num_trips = global_store['layer_data'][feature.getId()];
+            if( num_trips ){
+              global_store.legend.multibar('setValue',[num_trips]);
+            } else {
+              $("#boxMultibar").find(".multi-bar-marker-content").empty();
+            }
+          }
+        });
+
+      });
+
+
+
+
+      // Instance the tour
+      var tour = new Tour({
+        steps: [
+        {
+          element: "#help_btn",
+          title: "Interface Tour",
+          placement: "left",
+          content: "Welcome to the interface tour! <br> Click to move through the tour higlighting all the options avaliable in this interface. The tour can be restarted at any time by clicking the question mark button currently highlighted."
+        },
+        {
+          element: "#btn_all",
+          title: "Selection of Origin Destination Matrix",
+          content: "The origin destination matrix being visualised is selected by clicking one of the options in the title bar. Once clicked a download button will appear enabling you to optionally download the raw OD matrix data (in either grid or ward granularity) as a zipped csv file."
+        },
+        {
+          element: "#map",
+          title: "Main Display",
+          content: "Click on the main map display to select origin/destination regions. Standard controls for online maps are avaliable, including scroll wheel zoom."
+        },
+        {
+          element: "#origindest_switch",
+          title: "Origin destination toggle",
+          content: "Alters the behaviour of a click on the main map between selecting an origin and selection a destination."
+        },
+        {
+          element: "#info_origin_well",
+          title: "Origin information panel",
+	  placement: "left",
+          content: "Contextual information regarding any origin selected on the main map will appear in the top right hand corner of the information panel."
+        },
+        {
+          element: "#origin_id_field",
+          title: "Specify origin by region ID",
+	  placement: "left",
+          content: "Click to directly specify a region ID to be used as the origin."
+        },
+        {
+          element: "#unselect_origin",
+          title: "Unselect origin",
+	  placement: "left",
+          content: "When an origin is selected a cross will appear here. Click to clear the selected origin."
+        },
+        {
+          element: "#origin_chart",
+          title: "Most visited destination graph",
+	  placement: "left",
+          content: "When an origin is selected a bar graph of the top most visited destinations for the selected origin will be displayed along with their relative percentage. Clicking on a bar will select the corresponding destination on the main map."
+        },
+        {
+          element: "#info_dest_well",
+          placement: "left",
+          title: "Destination information panel",
+          content: "Contextual information regarding any destination selected on the main map will appear in the top right hand corner of the information panel."
+        },
+        {
+          element: "#dest_id_field",
+          placement: "left",
+          title: "Specify destination by region ID",
+          content: "Click to directly specify a region ID to be used as the destination."
+        },
+        {
+          element: "#unselect_dest",
+          placement: "left",
+          title: "Unselect destionation",
+          content: "When a destination is selected a cross will appear here. Click to clear the selected destination."
+        },
+        {
+          element: "#dest_chart",
+          placement: "left",
+          title: "Most visited origin graph",
+          content: "When a destination is selected a bar graph of the locations from which the largest number of jounerys originated will be displayed along with their relative percentage. Clicking on a bar will select the corresponding origin on the main map."
+        },
+        {
+          element: "#info_trips",
+          title: "Journey information",
+          content: "Contextual information regarding jounerys based on the displayed origin destination matrix will be displayed here."
+        },
+        {
+          element: "#layer_btn_wards",
+          title: "OD matrix granularity",
+          content: "Click to toggle between displaying the origin destination matrix based on the underlying zone units or wards."
+        },
+        {
+          element: "#layer_btn_route",
+          title: "OD matrix visualisation type",
+          content: "Click to toggle the visualisation of the OD matrix from region based (amount of journeys from a selected origin or destination) to route based (estimated jouneys along road segments). Note that the region based visualisation is not avaliable when selecting both an origin and destination."
+        },
+        {
+          element: "#label_layer_control",
+          placement: "left",
+          title: "Layer on/off buttons",
+          content: "Click to toggle the text labels or the data layer on and off."
+        },
+        {
+          element: "#map_dl_btn",
+          title: "Download map (and legend if avaliable)",
+          content: "Click to download the map as a png file. If a legend is displayed this will additionally be downloaded as a separate png file."
+        }
+        ]});
+
+// Initialize the tour
+tour.init();
+
+$('#help_btn').on('click', function (e) {
+  tour.restart();
+  tour.start();
+
+});
+
+// Start the tour
+tour.start(); // this will use cookies to hide it on subsequent visits to the webpage
+
+
+update_selection();
+
+map.on('pointermove', function (e) {
+        var pixel = map.getEventPixel(e.originalEvent);
+        var hit = map.hasFeatureAtPixel(pixel);
+        if (hit) {
+          map.getViewport().style.cursor = 'pointer'; 
+        }
+        else {
+         map.getViewport().style.cursor = '';  
+        }
+        
+  });
+
+</script>
+</body>
+</html>
